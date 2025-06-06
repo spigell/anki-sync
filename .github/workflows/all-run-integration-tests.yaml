@@ -43,5 +43,5 @@ jobs:
       - name: Run make build
         run: make build
 
-      - name: Run make tests
-        run: make tests
+      - name: Run make integration-tests
+        run: make integration-tests -B
