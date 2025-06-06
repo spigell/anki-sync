@@ -1,0 +1,73 @@
+version: "2"
+
+run:
+  build-tags:
+    - bench
+  tests: true
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bodyclose
+    - copyloopvar
+    - dogsled
+    - dupl
+    - durationcheck
+    - errorlint
+    - funlen
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - goheader
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nestif
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+  settings:
+    funlen:
+      lines: 500
+      statements: 80
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - errcheck
+          - gocyclo
+          - gosec
+        path: _test\.go
+    paths:
+      - provider/cmd/pulumi-resource-talos-cluster/schema.json$
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

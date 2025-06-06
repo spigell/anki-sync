@@ -1,0 +1,11 @@
+deck_name: English::Basic
+model_name: BasicModel
+primary_field: "Front"
+
+notes:
+  - fields:
+      Front: Hello
+      Back: สวัสดี
+  - fields:
+      Front: Thank you
+      Back: ขอบคุณ

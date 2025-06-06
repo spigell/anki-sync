@@ -1,0 +1,10 @@
+deck_name: "Test"
+model_name: "Basic"
+
+primary_field: "Front"
+
+notes:
+  - fields:
+      Front: "Hello"
+      Back: "World"
+    tags: ["anki-sync"]

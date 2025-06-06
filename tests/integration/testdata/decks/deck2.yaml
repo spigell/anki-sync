@@ -1,0 +1,14 @@
+deck_name: English::Sentences
+model_name: SentenceModel
+primary_field: "Sentence"
+
+notes:
+  - fields:
+      Sentence: How are you?
+      Translation: คุณสบายดีไหม
+  - fields:
+      Sentence: I'm fine, thanks.
+      Translation: ฉันสบายดี ขอบคุณ
+  - fields:
+      Sentence: Where are you from?
+      Translation: คุณมาจากที่ไหน     

@@ -1,0 +1,13 @@
+services: 
+  anki-desktop: 
+    image: anki-desktop:1
+    # command: ["ls -alht /config/app/Anki2"]
+    # entrypoint: "/bin/bash -c"
+    container_name: anki-desktop
+    # network_mode: host
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 127.0.0.1:8765:8765
+      - 127.0.0.1:3000:3000

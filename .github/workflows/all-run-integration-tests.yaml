@@ -1,0 +1,47 @@
+name: Build and Test with AnkiConnect
+
+on:
+  push:
+
+jobs:
+  build_test:
+    runs-on: ubuntu-24.04
+
+    services:
+      anki:
+        image: ghcr.io/spigell/anki-desktop-docker:25.02.5-latest
+        ports:
+          - 8765:8765
+        options: >-
+          --health-cmd="curl -f http://localhost:8765 || exit 1"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=12
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make curl
+
+      - name: Wait for AnkiConnect to be ready
+        run: |
+          echo "Waiting for AnkiConnect on http://localhost:8765..."
+          for i in {1..30}; do
+            if curl -sf http://localhost:8765 >/dev/null; then
+              echo "AnkiConnect is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "AnkiConnect did not respond in time" >&2
+          exit 1
+
+      - name: Run make build
+        run: make build
+
+      - name: Run make tests
+        run: make tests

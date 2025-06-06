@@ -1,0 +1,54 @@
+deck_name: English::Sentences
+model_name: SentenceModel
+primary_field: "Sentence"
+
+notes:
+  - fields:
+      Sentence: What time is it?
+      Translation: ตอนนี้กี่โมง
+    tags: [common, daily]
+    
+  - fields:
+      Sentence: I don't understand.
+      Translation: ฉันไม่เข้าใจ
+    tags: [common, communication]
+
+  - fields:
+      Sentence: Can you help me?
+      Translation: คุณช่วยฉันได้ไหม
+    tags: [common, emergency]
+
+  - fields:
+      Sentence: I’m learning Thai.
+      Translation: ฉันกำลังเรียนภาษาไทย
+    tags: [language, personal]
+
+  - fields:
+      Sentence: This is delicious!
+      Translation: อร่อยมากเลย!
+    tags: [food, praise]
+
+  - fields:
+      Sentence: Where is the bathroom?
+      Translation: ห้องน้ำอยู่ที่ไหน
+    tags: [travel, emergency]
+
+  - fields:
+      Sentence: I like this place.
+      Translation: ฉันชอบที่นี่
+    tags: [travel, opinion]
+
+  - fields:
+      Sentence: I need a doctor.
+      Translation: ฉันต้องการหมอ
+    tags: [health, emergency]
+
+  - fields:
+      Sentence: I'm lost.
+      Translation: ฉันหลงทาง
+    tags: [travel, emergency]
+
+  - fields:
+      Sentence: See you tomorrow!
+      Translation: เจอกันพรุ่งนี้นะ
+    tags: [common, farewell]

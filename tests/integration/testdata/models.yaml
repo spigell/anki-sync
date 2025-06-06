@@ -1,0 +1,45 @@
+models:
+  - name: "Test"
+    fields: ["Front", "Back"]
+    css: |
+      .card {
+          font-family: arial;
+          font-size: 20px;
+          text-align: center;
+          color: black;
+          background-color: white;
+      }
+    isCloze: false
+    cardTemplates:
+      - name: "Card 1"
+        front: "{{Front}}"
+        back: "{{FrontSide}}\n\n<hr id=answer>\n\n{{Back}}"
+
+  - name: BasicModel
+    fields: [Front, Back]
+    cardTemplates:
+      - name: Card 1
+        front: "{{Front}}"
+        back: "{{Front}}<hr id=answer>{{Back}}"
+    css: |
+      .card {
+        font-family: arial;
+        font-size: 20px;
+        text-align: center;
+        color: black;
+        background-color: white;
+      }
+
+  - name: SentenceModel
+    fields: [Sentence, Translation]
+    cardTemplates:
+      - name: Default
+        front: "{{Sentence}}"
+        back: "{{Sentence}}<hr id=answer>{{Translation}}"
+    css: |
+      .card {
+        font-family: 'Noto Sans Thai', sans-serif;
+        font-size: 18px;
+        color: #333;
+        background: #fefefe;
+      }

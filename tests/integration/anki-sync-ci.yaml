@@ -1,0 +1,6 @@
+decks: tests/integration/testdata
+models: not-existed-file.yaml
+anki_url: http://127.0.0.1:8765
+recursive: true
+upload_parallelism: 3
+log_level: info
