@@ -50,7 +50,7 @@ func NewSyncCmd(ctx context.Context, logger *logging.Logger) *SyncCmd {
 				}
 
 				logger.Info("parsed decks", zap.Any("files", validDeckFiles))
-				
+
 				if len(invalidDeckFiles) > 0 {
 					logger.Warn("invalid decks files. They are skipped", zap.Any("files", invalidDeckFiles))
 				}
