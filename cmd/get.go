@@ -26,7 +26,7 @@ func NewGetCmd(ctx context.Context, logger *logging.Logger) *GetCmd {
 
 	// add subcommands
 	modelCmd := newGetModelCmd(ctx, logger)
-	getCmd.AddCommand(modelCmd.Command())
+	getCmd.AddCommand(modelCmd.Command)
 
 	return c
 }
@@ -35,13 +35,13 @@ func (c *GetCmd) Command() *cobra.Command { return c.command }
 func (c *GetCmd) SetFlags()               {}
 func (c *GetCmd) Validate() error         { return nil }
 
-// get model command
-
+// get model command.
 type GetModelCmd struct {
-	command *cobra.Command
-	ctx     context.Context
-	logger  *logging.Logger
-	name    string
+	ctx    context.Context
+	logger *logging.Logger
+	name   string
+
+	Command *cobra.Command
 }
 
 func newGetModelCmd(ctx context.Context, logger *logging.Logger) *GetModelCmd {
@@ -53,20 +53,11 @@ func newGetModelCmd(ctx context.Context, logger *logging.Logger) *GetModelCmd {
 	}
 	cmd.Flags().StringVar(&g.name, "name", "", "Model name")
 	cmd.MarkFlagRequired("name")
-	g.command = cmd
+	g.Command = cmd
 	return g
 }
 
-func (g *GetModelCmd) Command() *cobra.Command { return g.command }
-func (g *GetModelCmd) SetFlags()               {}
-func (g *GetModelCmd) Validate() error {
-	if g.name == "" {
-		return fmt.Errorf("--name is required")
-	}
-	return nil
-}
-
-func (g *GetModelCmd) runE(cmd *cobra.Command, args []string) error {
+func (g *GetModelCmd) runE(_ *cobra.Command, _ []string) error {
 	client := anki.NewClient(Config.AnkiURL)
 
 	templates, err := client.GetModelTemplates(g.ctx, g.name)
