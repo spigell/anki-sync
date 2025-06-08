@@ -1,6 +1,6 @@
-decks: ./decks
-models: models.txt
-anki_url: http://127.0.0.1:8765
-recursive: true
-upload_parallelism: 3
-log_level: info
+decks: ./decks                       # path to YAML files with deck definitions
+models: models.txt                   # list of models to sync
+anki_url: http://127.0.0.1:8765      # AnkiConnect endpoint
+recursive: true                      # recurse into subdirectories for decks
+upload_parallelism: 3                # concurrent note uploads per file
+log_level: info                      # logging verbosity
