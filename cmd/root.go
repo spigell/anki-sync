@@ -45,6 +45,7 @@ type ValidatedCommand interface {
 func NewRootCmd(ctx context.Context, logger *Logger) *cobra.Command {
 	commands := []ValidatedCommand{
 		NewSyncCmd(ctx, logger.Instance),
+		NewGetCmd(ctx, logger.Instance),
 		NewVersionCmd(ctx, logger.Instance.Logger),
 	}
 
