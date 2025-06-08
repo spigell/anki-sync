@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"sort"
 	"time"
 )
 
@@ -106,6 +107,68 @@ func (c *Client) UpdateModelStyling(ctx context.Context, name string, css string
 		Version: 6,
 		Params:  data,
 	}, nil)
+}
+
+func (c *Client) GetModelTemplates(ctx context.Context, name string) ([]CardTemplate, error) {
+	var result map[string]struct {
+		Front string `json:"Front"`
+		Back  string `json:"Back"`
+	}
+
+	err := c.do(ctx, request{
+		Action:  "modelTemplates",
+		Version: 6,
+		Params: map[string]string{
+			"modelName": name,
+		},
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	templates := make([]CardTemplate, 0, len(result))
+	for name, t := range result {
+		templates = append(templates, CardTemplate{Name: name, Front: t.Front, Back: t.Back})
+	}
+	sort.Slice(templates, func(i, j int) bool { return templates[i].Name < templates[j].Name })
+
+	return templates, nil
+}
+
+func (c *Client) GetModelStyling(ctx context.Context, name string) (string, error) {
+	var result struct {
+		CSS string `json:"css"`
+	}
+
+	err := c.do(ctx, request{
+		Action:  "modelStyling",
+		Version: 6,
+		Params: map[string]string{
+			"modelName": name,
+		},
+	}, &result)
+	if err != nil {
+		return "", err
+	}
+
+	return result.CSS, nil
+}
+
+func (c *Client) GetModelFieldNames(ctx context.Context, name string) ([]string, error) {
+	var result []string
+
+	err := c.do(ctx, request{
+		Action:  "modelFieldNames",
+		Version: 6,
+		Params: map[string]string{
+			"modelName": name,
+		},
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (c *Client) DeckExists(ctx context.Context, name string) (bool, error) {
