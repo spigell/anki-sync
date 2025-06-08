@@ -154,6 +154,23 @@ func (c *Client) GetModelStyling(ctx context.Context, name string) (string, erro
 	return result.CSS, nil
 }
 
+func (c *Client) GetModelFieldNames(ctx context.Context, name string) ([]string, error) {
+	var result []string
+
+	err := c.do(ctx, request{
+		Action:  "modelFieldNames",
+		Version: 6,
+		Params: map[string]string{
+			"modelName": name,
+		},
+	}, &result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (c *Client) DeckExists(ctx context.Context, name string) (bool, error) {
 	var result []string
 	err := c.do(ctx, request{
