@@ -57,14 +57,13 @@ func newGetModelCmd(ctx context.Context, logger *logging.Logger) *GetModelCmd {
 	return g
 }
 
+func (g *GetModelCmd) runE(_ *cobra.Command, _ []string) error {
+	client := anki.NewClient(Config.AnkiURL)
+
 	fields, err := client.GetModelFieldNames(g.ctx, g.name)
 	if err != nil {
 		return fmt.Errorf("get fields: %w", err)
 	}
-
-		InOrderFields: fields,
-func (g *GetModelCmd) runE(_ *cobra.Command, _ []string) error {
-	client := anki.NewClient(Config.AnkiURL)
 
 	templates, err := client.GetModelTemplates(g.ctx, g.name)
 	if err != nil {
@@ -78,15 +77,12 @@ func (g *GetModelCmd) runE(_ *cobra.Command, _ []string) error {
 
 	model := anki.Model{
 		Name:          g.name,
+		InOrderFields: fields,
 		CSS:           css,
 		CardTemplates: templates,
 	}
 
-	wrap := struct {
-		Models []anki.Model `yaml:"models"`
-	}{Models: []anki.Model{model}}
-
-	out, err := yaml.Marshal(wrap)
+	out, err := yaml.Marshal(model)
 	if err != nil {
 		return err
 	}
