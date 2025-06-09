@@ -14,6 +14,8 @@ go install github.com/spigell/anki-sync@latest
 
 Requires Go 1.23 or newer.
 
+See `anki-sync-example.yaml` for a sample configuration.
+
 ## Development
 
 1. Run `make build` to compile the binary.
@@ -24,9 +26,8 @@ Requires Go 1.23 or newer.
 
 1. fix linter issues
 2. add support for images and audio
+3. add a validation layer
 
-See `anki-sync-example.yaml` for a sample configuration.
-
+## Bonus
 For a cool MCP-based server that talks to Anki, see
 [anki-mcp-server](https://github.com/CamdenClark/anki-mcp-server).
-
