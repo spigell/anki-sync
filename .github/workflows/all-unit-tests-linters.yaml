@@ -9,4 +9,4 @@ on:
 jobs:
   call-workflow:
     name: Call the shared testing golang workflow
-    uses: spigell/my-shared-workflows/.github/workflows/golang-test-lint.yaml@main
+    uses: spigell/my-shared-workflows/.github/workflows/golang-test-lint.yaml@spigell/fix/allow-remote-use
