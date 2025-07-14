@@ -8,6 +8,6 @@ on:
 
 jobs:
   test-workflow:
-    uses: spigell/my-shared-workflows/.github/workflows/golang-binary-release.yaml
+    uses: spigell/my-shared-workflows/.github/workflows/golang-binary-release.yaml@spigel/feat/add-go-build
     secrets:
       gh-token: ${{ secrets.GITHUB_TOKEN }}
