@@ -5,25 +5,11 @@ on:
     tags:
       - '*'
 
-permissions:
-  contents: write
 
 jobs:
-  component-release:
-    name: "Release binaries"
-    runs-on: ubuntu-24.04
-    if: github.event.base_ref == ${{ github.event.repository.default_branch }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Go ✨
-        uses: actions/setup-go@v4
-        with:
-          cache: false
-          go-version-file: go.mod
-      - name: Release required binaries
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          args: release --clean --verbose
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  test-workflow:
+    uses: spigell/my-shared-workflows/.github/workflows/golang-binary-release.yaml@spigel/feat/add-go-build
+    permissions:
+      contents: write
+    secrets:
+      gh-token: ${{ secrets.GITHUB_TOKEN }}
