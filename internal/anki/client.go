@@ -27,6 +27,13 @@ func WithAPIKey(key string) Option {
 	}
 }
 
+// WithTimeout sets the HTTP timeout for each request.
+func WithTimeout(d time.Duration) Option {
+	return func(c *Client) {
+		c.client.Timeout = d
+	}
+}
+
 func NewClient(baseURL string, opts ...Option) *Client {
 	c := &Client{
 		baseURL: baseURL,
@@ -70,6 +77,11 @@ func (c *Client) GetVersion(ctx context.Context) (string, error) {
 	var v int
 	err := c.do(ctx, request{Action: "version", Version: 6}, &v)
 	return fmt.Sprintf("%d", v), err
+}
+
+// Sync triggers an AnkiWeb sync of the open profile and waits until it finishes.
+func (c *Client) Sync(ctx context.Context) error {
+	return c.do(ctx, request{Action: "sync", Version: 6}, nil)
 }
 
 func (c *Client) ModelExists(ctx context.Context, name string) (bool, error) {
