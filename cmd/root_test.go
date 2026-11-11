@@ -14,35 +14,60 @@ import (
 	"go.uber.org/zap"
 )
 
-// runVersion runs `anki-sync version` against a fake AnkiConnect and returns the sent key.
-func runVersion(t *testing.T, configKey string) (string, bool) {
+// fakeAnki starts a fake AnkiConnect that stores each decoded request in got
+// and replies with reply. It returns the server URL.
+func fakeAnki(t *testing.T, got *map[string]any, reply string) string {
+	t.Helper()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(got); err != nil {
+			t.Errorf("decode request: %v", err)
+		}
+		w.Write([]byte(reply))
+	}))
+	t.Cleanup(srv.Close)
+
+	return srv.URL
+}
+
+// runCLI runs anki-sync with args and a config file holding configBody.
+func runCLI(t *testing.T, configBody string, args ...string) error {
 	t.Helper()
 
 	viper.Reset()
 	*Config = AppConfig{}
 
-	var got map[string]any
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
-			t.Errorf("decode request: %v", err)
-		}
-		w.Write([]byte(`{"result": 6, "error": null}`))
-	}))
-	defer srv.Close()
-
 	cfg := filepath.Join(t.TempDir(), "anki-sync.yaml")
-	content := "anki_url: " + srv.URL + "\n"
-	if configKey != "" {
-		content += "anki_api_key: " + configKey + "\n"
-	}
-	if err := os.WriteFile(cfg, []byte(content), 0o600); err != nil {
+	if err := os.WriteFile(cfg, []byte(configBody), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
 	level := zap.NewAtomicLevelAt(zap.InfoLevel)
 	root := NewRootCmd(context.Background(), &Logger{Instance: logging.NewLogger(level), Level: level})
-	root.SetArgs([]string{"--config", cfg, "version"})
-	if err := root.Execute(); err != nil {
+	root.SilenceErrors = true
+	root.SilenceUsage = true
+	root.SetArgs(append([]string{"--config", cfg}, args...))
+	return root.Execute()
+}
+
+func unsetEnv(t *testing.T, key string) {
+	t.Helper()
+
+	t.Setenv(key, "")
+	os.Unsetenv(key)
+}
+
+// runVersion runs `anki-sync version` against a fake AnkiConnect and returns the sent key.
+func runVersion(t *testing.T, configKey string) (string, bool) {
+	t.Helper()
+
+	var got map[string]any
+	content := "anki_url: " + fakeAnki(t, &got, `{"result": 6, "error": null}`) + "\n"
+	if configKey != "" {
+		content += "anki_api_key: " + configKey + "\n"
+	}
+
+	if err := runCLI(t, content, "version"); err != nil {
 		t.Fatalf("execute: %v", err)
 	}
 
@@ -51,8 +76,7 @@ func runVersion(t *testing.T, configKey string) (string, bool) {
 }
 
 func TestAPIKeyFromConfig(t *testing.T) {
-	t.Setenv("ANKI_API_KEY", "")
-	os.Unsetenv("ANKI_API_KEY")
+	unsetEnv(t, "ANKI_API_KEY")
 
 	key, ok := runVersion(t, "from-config")
 	if !ok || key != "from-config" {
@@ -70,10 +94,37 @@ func TestAPIKeyEnvOverridesConfig(t *testing.T) {
 }
 
 func TestAPIKeyOmittedWhenUnset(t *testing.T) {
-	t.Setenv("ANKI_API_KEY", "")
-	os.Unsetenv("ANKI_API_KEY")
+	unsetEnv(t, "ANKI_API_KEY")
 
 	if key, ok := runVersion(t, ""); ok {
 		t.Fatalf("request has key %q, want none", key)
+	}
+}
+
+func TestAnkiURLEnvOverridesConfig(t *testing.T) {
+	unsetEnv(t, "ANKI_API_KEY")
+
+	var got map[string]any
+	t.Setenv("ANKI_URL", fakeAnki(t, &got, `{"result": 6, "error": null}`))
+
+	// The config URL is unreachable, so only ANKI_URL can reach the fake AnkiConnect.
+	if err := runCLI(t, "anki_url: http://127.0.0.1:1\n", "version"); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	if got["action"] != "version" {
+		t.Fatalf("request = %v, want version action", got)
+	}
+}
+
+func TestAnkiURLEnvIgnoredWhenEmpty(t *testing.T) {
+	unsetEnv(t, "ANKI_API_KEY")
+	t.Setenv("ANKI_URL", "")
+
+	var got map[string]any
+	if err := runCLI(t, "anki_url: "+fakeAnki(t, &got, `{"result": 6, "error": null}`)+"\n", "version"); err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	if got["action"] != "version" {
+		t.Fatalf("request = %v, want version action", got)
 	}
 }

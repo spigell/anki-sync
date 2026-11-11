@@ -48,6 +48,7 @@ func NewRootCmd(ctx context.Context, logger *Logger) *cobra.Command {
 	commands := []ValidatedCommand{
 		NewSyncCmd(ctx, logger.Instance),
 		NewGetCmd(ctx, logger.Instance),
+		NewAnkiWebSyncCmd(ctx, logger.Instance),
 		NewVersionCmd(ctx, logger.Instance.Logger),
 	}
 
@@ -83,6 +84,8 @@ func NewRootCmd(ctx context.Context, logger *Logger) *cobra.Command {
 				logger.Level.SetLevel(lvl)
 				logger.Instance.Info("set logLevel", zap.String("level", lvl.String()))
 			}
+
+			logger.Instance.Debug("using AnkiConnect", zap.String("url", Config.AnkiURL))
 
 			if Config.DryRun {
 				logger.Instance.EnableDryRunLogger()
@@ -120,12 +123,13 @@ func NewRootCmd(ctx context.Context, logger *Logger) *cobra.Command {
 	viper.AutomaticEnv()
 	// Explicit env name skips the prefix. Env wins over the config file.
 	viper.BindEnv("anki_api_key", "ANKI_API_KEY")
+	viper.BindEnv("anki_url", "ANKI_URL")
 
 	return rootCmd
 }
 
-func newAnkiClient() *anki.Client {
-	return anki.NewClient(Config.AnkiURL, anki.WithAPIKey(Config.AnkiAPIKey))
+func newAnkiClient(opts ...anki.Option) *anki.Client {
+	return anki.NewClient(Config.AnkiURL, append([]anki.Option{anki.WithAPIKey(Config.AnkiAPIKey)}, opts...)...)
 }
 
 func initConfig() error {
