@@ -58,7 +58,7 @@ func newGetModelCmd(ctx context.Context, logger *logging.Logger) *GetModelCmd {
 }
 
 func (g *GetModelCmd) runE(_ *cobra.Command, _ []string) error {
-	client := anki.NewClient(Config.AnkiURL)
+	client := newAnkiClient()
 
 	fields, err := client.GetModelFieldNames(g.ctx, g.name)
 	if err != nil {

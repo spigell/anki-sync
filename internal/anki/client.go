@@ -14,11 +14,21 @@ import (
 
 type Client struct {
 	baseURL string
+	apiKey  string
 	client  *http.Client
 }
 
-func NewClient(baseURL string) *Client {
-	return &Client{
+type Option func(*Client)
+
+// WithAPIKey sets the AnkiConnect API key sent with every request.
+func WithAPIKey(key string) Option {
+	return func(c *Client) {
+		c.apiKey = key
+	}
+}
+
+func NewClient(baseURL string, opts ...Option) *Client {
+	c := &Client{
 		baseURL: baseURL,
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -30,12 +40,19 @@ func NewClient(baseURL string) *Client {
 			Timeout: 10 * time.Second,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
 
 type request struct {
 	Action  string `json:"action"`
 	Version int    `json:"version"`
 	Params  any    `json:"params,omitempty"`
+	Key     string `json:"key,omitempty"`
 }
 
 type response struct {
@@ -271,6 +288,8 @@ func (c *Client) UpdateNoteTags(ctx context.Context, noteID int64, tags []string
 }
 
 func (c *Client) do(ctx context.Context, req request, result any) error {
+	req.Key = c.apiKey
+
 	body, err := json.Marshal(req)
 	if err != nil {
 		return err
