@@ -16,6 +16,17 @@ Requires Go 1.23 or newer.
 
 See `anki-sync-example.yaml` for a sample configuration.
 
+### AnkiConnect API key
+
+If AnkiConnect is configured with an `apiKey`, anki-sync sends it as the `key` field of every request. Set it with the `ANKI_API_KEY` environment variable (recommended, so the key never lands in a committed config file):
+
+```bash
+export ANKI_API_KEY=your_api_key_here
+anki-sync sync --config anki-sync.yaml
+```
+
+or with `anki_api_key` in the config file. When both are set, `ANKI_API_KEY` wins. When neither is set, no key is sent. anki-sync never logs the key.
+
 ## Development
 
 1. Run `make build` to compile the binary.

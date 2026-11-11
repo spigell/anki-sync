@@ -14,11 +14,21 @@ import (
 
 type Client struct {
 	baseURL string
+	apiKey  string
 	client  *http.Client
 }
 
-func NewClient(baseURL string) *Client {
-	return &Client{
+type Option func(*Client)
+
+// WithAPIKey sets the AnkiConnect API key sent with every request.
+func WithAPIKey(key string) Option {
+	return func(c *Client) {
+		c.apiKey = key
+	}
+}
+
+func NewClient(baseURL string, opts ...Option) *Client {
+	c := &Client{
 		baseURL: baseURL,
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -30,12 +40,25 @@ func NewClient(baseURL string) *Client {
 			Timeout: 10 * time.Second,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	return c
 }
+
+// AnkiConnect request parameter names.
+const (
+	paramModelName = "modelName"
+	paramNote      = "note"
+)
 
 type request struct {
 	Action  string `json:"action"`
 	Version int    `json:"version"`
 	Params  any    `json:"params,omitempty"`
+	Key     string `json:"key,omitempty"`
 }
 
 type response struct {
@@ -119,7 +142,7 @@ func (c *Client) GetModelTemplates(ctx context.Context, name string) ([]CardTemp
 		Action:  "modelTemplates",
 		Version: 6,
 		Params: map[string]string{
-			"modelName": name,
+			paramModelName: name,
 		},
 	}, &result)
 	if err != nil {
@@ -144,7 +167,7 @@ func (c *Client) GetModelStyling(ctx context.Context, name string) (string, erro
 		Action:  "modelStyling",
 		Version: 6,
 		Params: map[string]string{
-			"modelName": name,
+			paramModelName: name,
 		},
 	}, &result)
 	if err != nil {
@@ -161,7 +184,7 @@ func (c *Client) GetModelFieldNames(ctx context.Context, name string) ([]string,
 		Action:  "modelFieldNames",
 		Version: 6,
 		Params: map[string]string{
-			"modelName": name,
+			paramModelName: name,
 		},
 	}, &result)
 	if err != nil {
@@ -199,10 +222,10 @@ func (c *Client) CreateDeck(ctx context.Context, name string) error {
 
 func (c *Client) AddNote(ctx context.Context, deck, model string, n Note) error {
 	note := map[string]any{
-		"deckName":  deck,
-		"modelName": model,
-		"fields":    n.Fields,
-		"tags":      n.Tags,
+		"deckName":     deck,
+		paramModelName: model,
+		"fields":       n.Fields,
+		"tags":         n.Tags,
 		"options": map[string]any{
 			"allowDuplicate": false,
 		},
@@ -210,7 +233,7 @@ func (c *Client) AddNote(ctx context.Context, deck, model string, n Note) error 
 	return c.do(ctx, request{
 		Action:  "addNote",
 		Version: 6,
-		Params:  map[string]any{"note": note},
+		Params:  map[string]any{paramNote: note},
 	}, nil)
 }
 
@@ -251,7 +274,7 @@ func (c *Client) UpdateNoteFields(ctx context.Context, noteID int64, fields map[
 		Action:  "updateNoteFields",
 		Version: 6,
 		Params: map[string]any{
-			"note": map[string]any{
+			paramNote: map[string]any{
 				"id":     noteID,
 				"fields": fields,
 			},
@@ -264,13 +287,15 @@ func (c *Client) UpdateNoteTags(ctx context.Context, noteID int64, tags []string
 		Action:  "updateNoteTags",
 		Version: 6,
 		Params: map[string]any{
-			"note": noteID,
-			"tags": tags,
+			paramNote: noteID,
+			"tags":    tags,
 		},
 	}, nil)
 }
 
 func (c *Client) do(ctx context.Context, req request, result any) error {
+	req.Key = c.apiKey
+
 	body, err := json.Marshal(req)
 	if err != nil {
 		return err

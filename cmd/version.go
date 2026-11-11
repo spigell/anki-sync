@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spigell/anki-sync/internal/anki"
-
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -21,7 +19,7 @@ func NewVersionCmd(ctx context.Context, logger *zap.Logger) *VersionCmd {
 		Use:   "version",
 		Short: "Show CLI and AnkiConnect version",
 		RunE: func(_ *cobra.Command, _ []string) error {
-			client := anki.NewClient(Config.AnkiURL)
+			client := newAnkiClient()
 			ver, err := client.GetVersion(ctx)
 			if err != nil {
 				logger.Warn("AnkiConnect version fetch failed", zap.Error(err))

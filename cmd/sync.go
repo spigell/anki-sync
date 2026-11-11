@@ -55,7 +55,7 @@ func NewSyncCmd(ctx context.Context, logger *logging.Logger) *SyncCmd {
 					logger.Warn("invalid decks files. They are skipped", zap.Any("files", invalidDeckFiles))
 				}
 
-				client := anki.NewClient(Config.AnkiURL)
+				client := newAnkiClient()
 
 				if err := model.NewModelManager(ctx, client, Config.DryRun, logger, &anki.Data{
 					Models: ms,

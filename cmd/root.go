@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/spigell/anki-sync/internal/anki"
 	"github.com/spigell/anki-sync/internal/logging"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -21,6 +22,7 @@ type AppConfig struct {
 	Decks             string `mapstructure:"decks"`
 	Models            string `mapstructure:"models"`
 	AnkiURL           string `mapstructure:"anki_url"`
+	AnkiAPIKey        string `mapstructure:"anki_api_key"`
 	Recursive         bool   `mapstructure:"recursive"`
 	UploadParallelism int    `mapstructure:"upload_parallelism"`
 	DryRun            bool   `mapstructure:"dry_run"`
@@ -116,8 +118,14 @@ func NewRootCmd(ctx context.Context, logger *Logger) *cobra.Command {
 
 	viper.SetEnvPrefix("anki_sync")
 	viper.AutomaticEnv()
+	// Explicit env name skips the prefix. Env wins over the config file.
+	viper.BindEnv("anki_api_key", "ANKI_API_KEY")
 
 	return rootCmd
+}
+
+func newAnkiClient() *anki.Client {
+	return anki.NewClient(Config.AnkiURL, anki.WithAPIKey(Config.AnkiAPIKey))
 }
 
 func initConfig() error {
